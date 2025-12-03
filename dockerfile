@@ -51,15 +51,15 @@ command=nginx -g "daemon off;" \
 autostart=true \
 autorestart=true' > /etc/supervisor/conf.d/supervisord.conf
 
-# Create volume mount directories with correct permissions
+# Create volume mount directories
 RUN mkdir -p /var/www/html/x3/_cache /var/www/html/x3/_cache/pages \
     /var/www/html/x3/render /var/www/html/x3/data /var/www/html/x3/_data \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/x3/_cache /var/www/html/x3/render \
     /var/www/html/x3/data /var/www/html/x3/_data
 
-# Copy installer (if using) or download X3 from repo
-COPY x3_installer.php /var/www/html/ 2>/dev/null || true
+# FIXED: Copy installer if present, then download X3
+COPY x3_installer.php* /var/www/html/
 RUN curl -L https://www.photo.gallery/download/x3.latest.flat.zip -o /tmp/x3.zip \
     && mkdir -p /var/www/html/x3 \
     && cd /var/www/html/x3 \
@@ -71,4 +71,3 @@ RUN curl -L https://www.photo.gallery/download/x3.latest.flat.zip -o /tmp/x3.zip
 EXPOSE 80
 WORKDIR /var/www/html
 VOLUME ["/var/www/html/x3/_cache", "/var/www/html/x3/render", "/var/www/html/x3/data", "/var/www/html/x3/_data"]
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
